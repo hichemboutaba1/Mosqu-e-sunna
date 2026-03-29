@@ -42,8 +42,18 @@
   "sameAs": ["https://mawaqit.net/fr/m/msjd-lsn-rwby-59100-france"]
 }
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Outfit';font-weight:300;font-style:normal;font-display:swap;src:url('fonts/outfit-300.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:400;font-style:normal;font-display:swap;src:url('fonts/outfit-400.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:600;font-style:normal;font-display:swap;src:url('fonts/outfit-600.woff2') format('woff2')}
+@font-face{font-family:'Cormorant Garamond';font-weight:400;font-style:normal;font-display:swap;src:url('fonts/cormorant-400.woff2') format('woff2')}
+@font-face{font-family:'Cormorant Garamond';font-weight:600;font-style:normal;font-display:swap;src:url('fonts/cormorant-600.woff2') format('woff2')}
+@font-face{font-family:'Cormorant Garamond';font-weight:700;font-style:normal;font-display:swap;src:url('fonts/cormorant-700.woff2') format('woff2')}
+@font-face{font-family:'Amiri';font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0600-06FF;src:url('fonts/amiri-arabic-400.woff2') format('woff2')}
+@font-face{font-family:'Amiri';font-weight:700;font-style:normal;font-display:swap;unicode-range:U+0600-06FF;src:url('fonts/amiri-arabic-700.woff2') format('woff2')}
+@font-face{font-family:'Amiri';font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00FF;src:url('fonts/amiri-latin-400.woff2') format('woff2')}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -104,6 +114,13 @@ section{padding:6rem 2rem}
 .prayer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;position:relative;z-index:1}
 .p-card{background:rgba(255,255,255,.04);border:1px solid rgba(201,166,85,.15);border-radius:10px;padding:28px 16px;text-align:center;transition:all .35s}
 .p-card:hover,.p-card.now{background:rgba(201,166,85,.1);border-color:var(--gold);transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.2)}
+.p-card.jumua{background:linear-gradient(135deg,rgba(201,166,85,.18),rgba(201,166,85,.06));border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,166,85,.3)}
+.p-card.jumua .p-time{font-size:1.1rem}
+.jumua-badge{display:inline-block;font-size:.68rem;background:var(--gold);color:var(--navy);font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:1px;margin-top:6px;text-transform:uppercase}
+.jumua-banner{text-align:center;margin-bottom:2rem;position:relative;z-index:1;padding:.9rem 1.5rem;background:rgba(201,166,85,.1);border:1px solid rgba(201,166,85,.3);border-radius:10px;display:none}
+.jumua-banner.show{display:block}
+.jumua-banner .jb-ar{font-family:'Amiri',serif;font-size:1.5rem;color:var(--gold);direction:rtl;margin-bottom:.3rem}
+.jumua-banner .jb-fr{font-size:.88rem;color:var(--gold-light)}
 .p-card .p-icon{font-size:1.8rem;margin-bottom:10px}
 .p-card .p-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--white);font-weight:600;margin-bottom:2px}
 .p-card .p-name-ar{font-family:'Amiri',serif;font-size:1rem;color:var(--gold-light);margin-bottom:12px}
@@ -111,6 +128,9 @@ section{padding:6rem 2rem}
 .prayer-status{text-align:center;margin-top:2rem;position:relative;z-index:1;font-size:.9rem;color:var(--gold-light)}
 .prayer-status a{color:var(--gold);text-decoration:none}
 .prayer-status a:hover{text-decoration:underline}
+.notif-btn{display:block;margin:1rem auto 0;background:transparent;border:1px solid rgba(201,166,85,.3);color:var(--gold-light);font-family:'Outfit',sans-serif;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;padding:8px 22px;border-radius:6px;cursor:pointer;transition:all .3s;position:relative;z-index:1}
+.notif-btn:hover{background:rgba(201,166,85,.1);border-color:var(--gold);color:var(--gold)}
+.notif-btn:disabled{opacity:.4;cursor:default}
 .countdown-box{text-align:center;margin:2rem auto 0;position:relative;z-index:1;background:rgba(201,166,85,.08);border:1px solid rgba(201,166,85,.25);border-radius:12px;padding:1.4rem 2rem;max-width:420px}
 .countdown-box .cd-label{font-size:.78rem;color:var(--gold-light);letter-spacing:2px;text-transform:uppercase;margin-bottom:.4rem}
 .countdown-box .cd-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--white);font-weight:600;margin-bottom:.5rem}
@@ -193,6 +213,19 @@ section{padding:6rem 2rem}
 .map-box{border-radius:10px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08)}
 .map-box iframe{width:100%;height:380px;border:none}
 
+/* CONTACT FORM */
+.contact-form{margin-top:1.5rem;display:flex;flex-direction:column;gap:10px}
+.cf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cf-input{width:100%;padding:12px 14px;background:var(--cream);border:1px solid var(--cream-dark);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--text);outline:none;transition:border .2s}
+.cf-input:focus{border-color:var(--gold)}
+.cf-textarea{resize:vertical;min-height:100px}
+.cf-btn{align-self:flex-start;padding:12px 32px;background:var(--navy);color:var(--gold);border:2px solid var(--navy);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all .3s}
+.cf-btn:hover{background:transparent;color:var(--navy)}
+.cf-btn:disabled{opacity:.5;cursor:default}
+.cf-msg{font-size:.82rem;min-height:1.2em;margin-top:4px}
+.cf-msg.ok{color:#2a9d5c}.cf-msg.err{color:#e05555}
+@media(max-width:500px){.cf-row{grid-template-columns:1fr}}
+
 /* FOOTER */
 footer{background:var(--navy);padding:2.5rem 2rem;text-align:center}
 footer .f-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:var(--gold);margin-bottom:.4rem}
@@ -274,10 +307,15 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:.3rem}
       <div class="greg" id="gregDate">—</div>
       <div class="hijr" id="hijrDate"></div>
     </div>
+    <div class="jumua-banner rv" id="jumuaBanner">
+      <div class="jb-ar">يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِنْ يَوْمِ الْجُمُعَةِ فَاسْعَوْا إِلَىٰ ذِكْرِ اللَّهِ</div>
+      <div class="jb-fr">Vendredi — Prière du Jumu'ah · « Accourez vers le rappel d'Allah » — Al-Jumu'ah, 9</div>
+    </div>
     <div class="prayer-grid rv" id="pGrid"></div>
     <div class="prayer-status rv" id="pStatus">☪ Chargement des horaires...</div>
     <button class="month-toggle rv" onclick="toggleMonthTable()" id="monthBtn" aria-expanded="false">&#128197; Voir les horaires du mois</button>
     <div class="month-table-wrap" id="monthTableWrap" aria-live="polite"></div>
+    <button class="notif-btn rv" id="notifBtn" onclick="requestNotifPermission()" aria-label="Activer les notifications de prière">🔔 Rappels avant les prières</button>
     <div class="countdown-box rv" id="countdownBox" style="display:none">
       <div class="cd-label">Prochaine prière</div>
       <div class="cd-name" id="cdName">—</div>
@@ -382,6 +420,15 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:.3rem}
         <div class="c-item"><div class="c-ico">📞</div><div><h3>Téléphone</h3><a href="tel:+33320702898">03 20 70 28 98</a></div></div>
         <div class="c-item"><div class="c-ico">🕐</div><div><h3>Horaires</h3><p>Ouverte 24h/24, 7j/7</p></div></div>
         <div class="c-item"><div class="c-ico">🌐</div><div><h3>Mawaqit</h3><a href="https://mawaqit.net/fr/m/msjd-lsn-rwby-59100-france" target="_blank">Voir sur Mawaqit ↗</a></div></div>
+        <form class="contact-form rv" id="contactForm" onsubmit="sendMessage(event)" novalidate aria-label="Formulaire de contact">
+          <div class="cf-row">
+            <input class="cf-input" type="text" name="from_name" placeholder="Votre nom" required aria-label="Nom">
+            <input class="cf-input" type="email" name="reply_to" placeholder="Votre email" required aria-label="Email">
+          </div>
+          <textarea class="cf-input cf-textarea" name="message" placeholder="Votre message…" required aria-label="Message"></textarea>
+          <button class="cf-btn" type="submit" id="cfBtn">Envoyer ✉️</button>
+          <p class="cf-msg" id="cfMsg"></p>
+        </form>
       </div>
       <div class="map-box rv">
         <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=3.170,50.690,3.184,50.698&layer=mapnik&marker=50.694,3.177" loading="lazy" title="Carte"></iframe>
@@ -488,9 +535,13 @@ function setCache(data) {
 function renderPrayers(timings, hijri) {
   _timings = timings;
   var today = new Date();
+  var isFriday = today.getDay() === 5;
   var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   document.getElementById('gregDate').textContent = today.toLocaleDateString('fr-FR', options);
   if (hijri) document.getElementById('hijrDate').textContent = hijri.day + ' ' + hijri.month.fr + ' ' + hijri.year + ' H';
+
+  // Jumu'ah banner on Fridays
+  if (isFriday) document.getElementById('jumuaBanner').classList.add('show');
 
   var nowM = today.getHours() * 60 + today.getMinutes();
   var currentIdx = -1;
@@ -500,10 +551,20 @@ function renderPrayers(timings, hijri) {
   }
   grid.innerHTML = '';
   for (var j = 0; j < prayers.length; j++) {
-    grid.appendChild(buildCard(prayers[j].icon, prayers[j].name, prayers[j].ar, timings[prayers[j].key], j === currentIdx));
+    var card = buildCard(prayers[j].icon, prayers[j].name, prayers[j].ar, timings[prayers[j].key], j === currentIdx);
+    // Jumu'ah : highlight Dhuhr on Fridays with badge
+    if (isFriday && prayers[j].key === 'Dhuhr') {
+      card.classList.add('jumua');
+      var badge = document.createElement('div');
+      badge.className = 'jumua-badge';
+      badge.textContent = "Jumu'ah";
+      card.appendChild(badge);
+    }
+    grid.appendChild(card);
   }
   status.innerHTML = 'Horaires calculés pour Roubaix · <a href="https://mawaqit.net/fr/m/msjd-lsn-rwby-59100-france" target="_blank">Voir sur Mawaqit ↗</a>';
   startCountdown();
+  scheduleNotifications();
 }
 
 function loadPrayers() {
@@ -532,6 +593,54 @@ function loadPrayers() {
 }
 
 loadPrayers();
+
+// ---- JUMU'AH + NOTIFICATIONS ----
+var _notifTimers = [];
+
+function scheduleNotifications() {
+  if (!_timings || Notification.permission !== 'granted') return;
+  _notifTimers.forEach(clearTimeout);
+  _notifTimers = [];
+  var now = new Date();
+  prayers.forEach(function(p) {
+    var parts = _timings[p.key].split(':');
+    var pDate = new Date();
+    pDate.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+    var alertTime = new Date(pDate.getTime() - 10 * 60 * 1000); // 10 min avant
+    var delay = alertTime - now;
+    if (delay > 0) {
+      _notifTimers.push(setTimeout(function(name, ar, icon) {
+        new Notification('🕌 Mosquée Sunna — ' + name + ' dans 10 min', {
+          body: icon + ' ' + ar + ' — ' + _timings[name],
+          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🕌</text></svg>',
+          tag: name
+        });
+      }, delay, p.name, p.ar, p.icon));
+    }
+  });
+}
+
+function requestNotifPermission() {
+  var btn = document.getElementById('notifBtn');
+  if (!('Notification' in window)) { btn.textContent = '🔕 Non supporté'; btn.disabled = true; return; }
+  if (Notification.permission === 'granted') { btn.textContent = '✅ Rappels activés'; btn.disabled = true; scheduleNotifications(); return; }
+  Notification.requestPermission().then(function(p) {
+    if (p === 'granted') {
+      btn.textContent = '✅ Rappels activés'; btn.disabled = true;
+      scheduleNotifications();
+      new Notification('🕌 Mosquée Sunna', { body: 'Vous serez rappelé 10 min avant chaque prière.', tag: 'welcome' });
+    } else {
+      btn.textContent = '🔕 Permission refusée'; btn.disabled = true;
+    }
+  });
+}
+
+// Init notif button state on load
+(function() {
+  var btn = document.getElementById('notifBtn');
+  if (!('Notification' in window)) { btn.textContent = '🔕 Non supporté'; btn.disabled = true; }
+  else if (Notification.permission === 'granted') { btn.textContent = '✅ Rappels activés'; btn.disabled = true; }
+})();
 
 // Copyright year
 document.getElementById('cpYear').textContent = new Date().getFullYear();
@@ -621,6 +730,44 @@ function loadMonthTable() {
     })
     .catch(function(){
       wrap.innerHTML = '<p style="color:var(--gold-light);text-align:center;padding:1rem">Impossible de charger le calendrier.</p>';
+    });
+}
+
+// ---- FORMULAIRE DE CONTACT (EmailJS) ----
+// 1. Créez un compte sur https://www.emailjs.com (gratuit jusqu'à 200 emails/mois)
+// 2. Créez un Service (ex. Gmail) et copiez le Service ID
+// 3. Créez un Template avec les variables {{from_name}}, {{reply_to}}, {{message}}
+// 4. Remplacez les 3 valeurs ci-dessous par les vôtres :
+var EMAILJS_PUBLIC_KEY  = 'VOTRE_PUBLIC_KEY';   // Account → API Keys
+var EMAILJS_SERVICE_ID  = 'VOTRE_SERVICE_ID';   // Email Services
+var EMAILJS_TEMPLATE_ID = 'VOTRE_TEMPLATE_ID';  // Email Templates
+
+function sendMessage(e) {
+  e.preventDefault();
+  var btn = document.getElementById('cfBtn');
+  var msg = document.getElementById('cfMsg');
+  var form = document.getElementById('contactForm');
+  if (EMAILJS_PUBLIC_KEY === 'VOTRE_PUBLIC_KEY') {
+    // Fallback mailto si EmailJS pas encore configuré
+    var name = form.from_name.value;
+    var email = form.reply_to.value;
+    var body = form.message.value;
+    window.location.href = 'mailto:contact@mosquee-sunna-roubaix.fr?subject=Message de ' + encodeURIComponent(name) + '&body=' + encodeURIComponent(body + '\n\nRépondre à : ' + email);
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Envoi…';
+  msg.className = 'cf-msg'; msg.textContent = '';
+  if (typeof emailjs === 'undefined') {
+    msg.className = 'cf-msg err'; msg.textContent = 'Service non disponible.';
+    btn.disabled = false; btn.textContent = 'Envoyer ✉️'; return;
+  }
+  emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, form, EMAILJS_PUBLIC_KEY)
+    .then(function() {
+      msg.className = 'cf-msg ok'; msg.textContent = '✓ Message envoyé. Jazakum Allahu khairan !';
+      form.reset(); btn.disabled = false; btn.textContent = 'Envoyer ✉️';
+    }, function() {
+      msg.className = 'cf-msg err'; msg.textContent = 'Erreur d\'envoi. Veuillez réessayer.';
+      btn.disabled = false; btn.textContent = 'Envoyer ✉️';
     });
 }
 
