@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hichemboutaba1.github.io/Mosqu-e-sunna/sitemap.xml

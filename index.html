@@ -17,6 +17,31 @@
 <meta name="twitter:title" content="Mosquée Sunna Roubaix">
 <meta name="twitter:description" content="Horaires de prière et informations pratiques — Mosquée Sunna, 16 Rue St Maurice, 59100 Roubaix.">
 <meta name="description" content="Mosquée Sunna de Roubaix - Horaires de prière, services, cours et événements. 16 Rue St Maurice, 59100 Roubaix.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MosqueOrTemple",
+  "name": "Mosquée Sunna",
+  "alternateName": "مسجد السنة",
+  "description": "Mosquée Sunna de Roubaix — Lieu de culte, d'apprentissage et de rassemblement. Cours Coran, prières quotidiennes, espace femmes.",
+  "url": "https://hichemboutaba1.github.io/Mosqu-e-sunna/",
+  "telephone": "+33320702898",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "16 Rue St Maurice",
+    "addressLocality": "Roubaix",
+    "postalCode": "59100",
+    "addressCountry": "FR"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 50.694,
+    "longitude": 3.177
+  },
+  "openingHours": "Mo-Su 00:00-23:59",
+  "sameAs": ["https://mawaqit.net/fr/m/msjd-lsn-rwby-59100-france"]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -84,6 +109,10 @@ section{padding:6rem 2rem}
 .prayer-status{text-align:center;margin-top:2rem;position:relative;z-index:1;font-size:.9rem;color:var(--gold-light)}
 .prayer-status a{color:var(--gold);text-decoration:none}
 .prayer-status a:hover{text-decoration:underline}
+.countdown-box{text-align:center;margin:2rem auto 0;position:relative;z-index:1;background:rgba(201,166,85,.08);border:1px solid rgba(201,166,85,.25);border-radius:12px;padding:1.4rem 2rem;max-width:420px}
+.countdown-box .cd-label{font-size:.78rem;color:var(--gold-light);letter-spacing:2px;text-transform:uppercase;margin-bottom:.4rem}
+.countdown-box .cd-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--white);font-weight:600;margin-bottom:.5rem}
+.countdown-box .cd-timer{font-size:2rem;color:var(--gold);font-weight:700;letter-spacing:3px;font-variant-numeric:tabular-nums}
 .mawaqit-wrap{margin-top:3rem;position:relative;z-index:1;border-radius:10px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .mawaqit-wrap iframe{width:100%;height:300px;border:none;display:block}
 
@@ -218,6 +247,11 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:.3rem}
     </div>
     <div class="prayer-grid rv" id="pGrid"></div>
     <div class="prayer-status rv" id="pStatus">☪ Chargement des horaires...</div>
+    <div class="countdown-box rv" id="countdownBox" style="display:none">
+      <div class="cd-label">Prochaine prière</div>
+      <div class="cd-name" id="cdName">—</div>
+      <div class="cd-timer" id="cdTimer">--:--:--</div>
+    </div>
     <div class="mawaqit-wrap rv">
       <iframe src="https://mawaqit.net/fr/w/msjd-lsn-rwby-59100-france" title="Mawaqit — Mosquée Sunna Roubaix" loading="lazy" allow="autoplay"></iframe>
     </div>
@@ -329,7 +363,7 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:.3rem}
 <footer>
   <div class="f-name">مسجد السنة — Mosquée Sunna</div>
   <p>16 Rue St Maurice, 59100 Roubaix</p>
-  <p style="margin-top:.8rem;font-size:.72rem">© 2025 Mosquée Sunna — Tous droits réservés</p>
+  <p style="margin-top:.8rem;font-size:.72rem">© <span id="cpYear">2025</span> Mosquée Sunna — Tous droits réservés</p>
 </footer>
 
 <script>
@@ -343,15 +377,16 @@ document.querySelectorAll('.rv').forEach(function(el) { obs.observe(el); });
 
 // Prayer times
 var prayers = [
-  { key: 'Fajr', name: 'Fajr', ar: 'الفجر', icon: '🌅' },
-  { key: 'Dhuhr', name: 'Dhuhr', ar: 'الظهر', icon: '☀️' },
-  { key: 'Asr', name: 'Asr', ar: 'العصر', icon: '🌤️' },
+  { key: 'Fajr',    name: 'Fajr',    ar: 'الفجر',  icon: '🌅' },
+  { key: 'Dhuhr',   name: 'Dhuhr',   ar: 'الظهر',  icon: '☀️' },
+  { key: 'Asr',     name: 'Asr',     ar: 'العصر',  icon: '🌤️' },
   { key: 'Maghrib', name: 'Maghrib', ar: 'المغرب', icon: '🌇' },
-  { key: 'Isha', name: 'Isha', ar: 'العشاء', icon: '🌙' }
+  { key: 'Isha',    name: 'Isha',    ar: 'العشاء',  icon: '🌙' }
 ];
 
-var grid = document.getElementById('pGrid');
+var grid   = document.getElementById('pGrid');
 var status = document.getElementById('pStatus');
+var _timings = null; // partagé entre render et countdown
 
 function buildCard(icon, name, ar, time, isNow) {
   var card = document.createElement('div');
@@ -363,7 +398,87 @@ function buildCard(icon, name, ar, time, isNow) {
   return card;
 }
 
+// ---- Compte à rebours prochaine prière ----
+function startCountdown() {
+  var box   = document.getElementById('countdownBox');
+  var cdName  = document.getElementById('cdName');
+  var cdTimer = document.getElementById('cdTimer');
+  if (!_timings) return;
+
+  function tick() {
+    var now  = new Date();
+    var nowM = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    var next = null, nextName = '', nextIcon = '';
+
+    for (var i = 0; i < prayers.length; i++) {
+      var parts = _timings[prayers[i].key].split(':');
+      var pSec  = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60;
+      if (pSec > nowM) { next = pSec; nextName = prayers[i].name; nextIcon = prayers[i].icon; break; }
+    }
+    // Si toutes les prières sont passées → Fajr de demain
+    if (!next) {
+      var fajrParts = _timings['Fajr'].split(':');
+      next = parseInt(fajrParts[0]) * 3600 + parseInt(fajrParts[1]) * 60 + 86400;
+      nextName = 'Fajr'; nextIcon = '🌅';
+    }
+
+    var diff = next - nowM;
+    var h = Math.floor(diff / 3600);
+    var m = Math.floor((diff % 3600) / 60);
+    var s = diff % 60;
+    cdName.textContent  = nextIcon + '  ' + nextName;
+    cdTimer.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    box.style.display = 'block';
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ---- Cache localStorage ----
+var CACHE_KEY = 'msunna_prayers';
+
+function getCached() {
+  try {
+    var raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    var obj = JSON.parse(raw);
+    if (obj.date !== new Date().toDateString()) return null;
+    return obj;
+  } catch(e) { return null; }
+}
+
+function setCache(data) {
+  try {
+    data.date = new Date().toDateString();
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  } catch(e) {}
+}
+
+function renderPrayers(timings, hijri) {
+  _timings = timings;
+  var today = new Date();
+  var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('gregDate').textContent = today.toLocaleDateString('fr-FR', options);
+  if (hijri) document.getElementById('hijrDate').textContent = hijri.day + ' ' + hijri.month.fr + ' ' + hijri.year + ' H';
+
+  var nowM = today.getHours() * 60 + today.getMinutes();
+  var currentIdx = -1;
+  for (var i = prayers.length - 1; i >= 0; i--) {
+    var parts = timings[prayers[i].key].split(':');
+    if (nowM >= parseInt(parts[0]) * 60 + parseInt(parts[1])) { currentIdx = i; break; }
+  }
+  grid.innerHTML = '';
+  for (var j = 0; j < prayers.length; j++) {
+    grid.appendChild(buildCard(prayers[j].icon, prayers[j].name, prayers[j].ar, timings[prayers[j].key], j === currentIdx));
+  }
+  status.innerHTML = 'Horaires calculés pour Roubaix · <a href="https://mawaqit.net/fr/m/msjd-lsn-rwby-59100-france" target="_blank">Voir sur Mawaqit ↗</a>';
+  startCountdown();
+}
+
 function loadPrayers() {
+  var cached = getCached();
+  if (cached) { renderPrayers(cached.timings, cached.hijri); return; }
+
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, '0');
   var mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -373,35 +488,11 @@ function loadPrayers() {
     .then(function(res) { return res.json(); })
     .then(function(data) {
       var timings = data.data.timings;
-      var hijri = data.data.date.hijri;
-
-      // Set dates
-      var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      document.getElementById('gregDate').textContent = today.toLocaleDateString('fr-FR', options);
-      if (hijri) {
-        document.getElementById('hijrDate').textContent = hijri.day + ' ' + hijri.month.fr + ' ' + hijri.year + ' H';
-      }
-
-      // Find current prayer
-      var now = today.getHours() * 60 + today.getMinutes();
-      var currentIdx = -1;
-      for (var i = prayers.length - 1; i >= 0; i--) {
-        var parts = timings[prayers[i].key].split(':');
-        var mins = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-        if (now >= mins) { currentIdx = i; break; }
-      }
-
-      // Build cards
-      for (var j = 0; j < prayers.length; j++) {
-        var p = prayers[j];
-        var timeStr = timings[p.key];
-        grid.appendChild(buildCard(p.icon, p.name, p.ar, timeStr, j === currentIdx));
-      }
-
-      status.innerHTML = 'Horaires calculés pour Roubaix · <a href="https://mawaqit.net/fr/m/msjd-lsn-rwby-59100-france" target="_blank">Voir sur Mawaqit ↗</a>';
+      var hijri   = data.data.date.hijri;
+      setCache({ timings: timings, hijri: hijri });
+      renderPrayers(timings, hijri);
     })
     .catch(function() {
-      // Fallback
       for (var k = 0; k < prayers.length; k++) {
         grid.appendChild(buildCard(prayers[k].icon, prayers[k].name, prayers[k].ar, '--:--', false));
       }
@@ -410,6 +501,9 @@ function loadPrayers() {
 }
 
 loadPrayers();
+
+// Copyright year
+document.getElementById('cpYear').textContent = new Date().getFullYear();
 
 // Service Worker
 if ('serviceWorker' in navigator) {
