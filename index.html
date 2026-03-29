@@ -109,6 +109,9 @@ section{padding:6rem 2rem}
 .prayers-sec{background:var(--navy);position:relative;overflow:hidden}
 .prayers-sec .sec-header h2{color:var(--white)}
 .prayer-dates{text-align:center;margin-bottom:2.5rem;position:relative;z-index:1}
+.live-clock{font-size:3.2rem;font-weight:700;color:var(--white);letter-spacing:4px;font-variant-numeric:tabular-nums;line-height:1;margin-bottom:.6rem;text-shadow:0 0 40px rgba(201,166,85,.2)}
+.live-clock .clock-sep{animation:blink 1s step-end infinite;color:var(--gold)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .prayer-dates .greg{font-size:1rem;color:var(--gold-light);font-weight:300}
 .prayer-dates .hijr{font-family:'Amiri',serif;font-size:1.15rem;color:var(--gold);margin-top:4px}
 .prayer-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;position:relative;z-index:1}
@@ -230,6 +233,14 @@ section{padding:6rem 2rem}
 footer{background:var(--navy);padding:2.5rem 2rem;text-align:center}
 footer .f-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:var(--gold);margin-bottom:.4rem}
 footer p{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:.3rem}
+.share-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin:1.2rem 0 .6rem}
+.share-label{font-size:.75rem;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase}
+.share-btn{width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s,opacity .2s;opacity:.75}
+.share-btn:hover{transform:scale(1.12);opacity:1}
+.share-btn svg{width:20px;height:20px}
+.share-wa{background:#25D366;color:#fff}
+.share-fb{background:#1877F2;color:#fff}
+.share-copy{background:rgba(255,255,255,.12);color:var(--gold)}
 
 /* REVEAL */
 .rv{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
@@ -304,6 +315,7 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:.3rem}
       <div class="bar"></div>
     </div>
     <div class="prayer-dates rv">
+      <div class="live-clock" id="liveClock">--:--:--</div>
       <div class="greg" id="gregDate">—</div>
       <div class="hijr" id="hijrDate"></div>
     </div>
@@ -399,8 +411,12 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:.3rem}
       <div class="don-verse">مَنْ أَنْفَقَ نَفَقَةً فِي سَبِيلِ اللَّهِ كُتِبَ لَهُ سَبْعُمِائَةِ ضِعْفٍ</div>
       <p class="don-trad">"Celui qui dépense dans le chemin d'Allah, sa récompense sera multipliée par sept cents."<br>— Hadith, At-Tirmidhi</p>
       <p class="don-trad">Contribuez à l'entretien et au développement de votre mosquée.</p>
-      <button class="don-btn" onclick="alert('Le système de donation sera bientôt disponible. Jazakum Allahu khairan!')">Faire un don</button>
-      <p class="don-note">Le système de paiement en ligne sera bientôt disponible</p>
+      <a class="don-btn" href="https://www.helloasso.com/associations/mosquee-sunna-roubaix" target="_blank" rel="noopener" id="helloassoBtn">Faire un don via HelloAsso</a>
+      <p class="don-note">HelloAsso · 100% des fonds reversés à la mosquée · Reçu fiscal disponible</p>
+      <!-- Widget HelloAsso (s'affiche si la campagne existe) -->
+      <div id="helloassoWidget" style="margin-top:2rem;display:none">
+        <iframe id="helloassoIframe" src="" width="100%" height="380" frameborder="0" scrolling="auto" allowtransparency="true" title="Don HelloAsso" style="border-radius:10px;max-width:600px;display:block;margin:0 auto"></iframe>
+      </div>
     </div>
   </div>
 </section>
@@ -441,10 +457,36 @@ footer p{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:.3rem}
 <footer>
   <div class="f-name">مسجد السنة — Mosquée Sunna</div>
   <p>16 Rue St Maurice, 59100 Roubaix</p>
+  <div class="share-bar">
+    <span class="share-label">Partager</span>
+    <button class="share-btn share-wa"  onclick="shareWA()"    aria-label="Partager sur WhatsApp">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.138.561 4.143 1.535 5.876L0 24l6.284-1.648A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-4.988-1.362l-.358-.213-3.71.973.988-3.61-.233-.369A9.79 9.79 0 012.182 12c0-5.42 4.398-9.818 9.818-9.818 5.42 0 9.818 4.398 9.818 9.818 0 5.42-4.398 9.818-9.818 9.818z"/></svg>
+    </button>
+    <button class="share-btn share-fb"  onclick="shareFB()"    aria-label="Partager sur Facebook">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.676 0H1.324C.593 0 0 .593 0 1.324v21.352C0 23.408.593 24 1.324 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.73 0 1.323-.593 1.323-1.324V1.324C24 .593 23.408 0 22.676 0"/></svg>
+    </button>
+    <button class="share-btn share-copy" onclick="copyLink(this)" aria-label="Copier le lien">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+    </button>
+  </div>
   <p style="margin-top:.8rem;font-size:.72rem">© <span id="cpYear">2025</span> Mosquée Sunna — Tous droits réservés</p>
 </footer>
 
 <script>
+// ---- HORLOGE LIVE ----
+(function tickClock() {
+  var el = document.getElementById('liveClock');
+  function update() {
+    var n = new Date();
+    var h = String(n.getHours()).padStart(2,'0');
+    var m = String(n.getMinutes()).padStart(2,'0');
+    var s = String(n.getSeconds()).padStart(2,'0');
+    el.innerHTML = h + '<span class="clock-sep">:</span>' + m + '<span class="clock-sep">:</span>' + s;
+  }
+  update();
+  setInterval(update, 1000);
+})();
+
 // Scroll reveal
 var obs = new IntersectionObserver(function(entries) {
   entries.forEach(function(e) {
@@ -640,6 +682,30 @@ function requestNotifPermission() {
   var btn = document.getElementById('notifBtn');
   if (!('Notification' in window)) { btn.textContent = '🔕 Non supporté'; btn.disabled = true; }
   else if (Notification.permission === 'granted') { btn.textContent = '✅ Rappels activés'; btn.disabled = true; }
+})();
+
+// ---- SHARE ----
+var SITE_URL  = 'https://hichemboutaba1.github.io/Mosqu-e-sunna/';
+var SITE_TEXT = 'Mosquée Sunna Roubaix — Horaires de prière et informations pratiques';
+function shareWA()  { window.open('https://wa.me/?text=' + encodeURIComponent(SITE_TEXT + ' : ' + SITE_URL), '_blank'); }
+function shareFB()  { window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(SITE_URL), '_blank'); }
+function copyLink(btn) {
+  navigator.clipboard.writeText(SITE_URL).then(function() {
+    var orig = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTimeout(function(){ btn.innerHTML = orig; }, 2000);
+  });
+}
+
+// ---- HELLOASSO ----
+// Remplace l'URL ci-dessous par ton URL HelloAsso une fois ta collecte créée sur helloasso.com
+var HELLOASSO_WIDGET = ''; // ex: 'https://www.helloasso.com/associations/mosquee-sunna-roubaix/collectes/don-mosquee/widget'
+(function() {
+  if (HELLOASSO_WIDGET) {
+    document.getElementById('helloassoIframe').src = HELLOASSO_WIDGET;
+    document.getElementById('helloassoWidget').style.display = 'block';
+    document.getElementById('helloassoBtn').style.display = 'none';
+  }
 })();
 
 // Copyright year
